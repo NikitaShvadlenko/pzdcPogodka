@@ -122,6 +122,19 @@ extension ViewController {
     private func updateCity(_ city: String) {
         headerView?.setCity(city)
     }
+
+    private func locationAlert(alertTitle:String, alertMessage: String) {
+        let alertController = UIAlertController(title: alertTitle , message: alertMessage, preferredStyle: .alert)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        let openAction = UIAlertAction(title: "Open Setting", style: .default) { (action) in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
+        }
+        alertController.addAction(openAction)
+        self.present(alertController, animated: true, completion: nil)
+    }
 }
 
 // MARL: - CLLocationManagerDelegate
@@ -152,21 +165,5 @@ extension ViewController: CLLocationManagerDelegate {
 
             self?.updateCity(city)
         }
-    }
-}
-
-//MARK: - Alerts
-extension ViewController{
-    func locationAlert(alertTitle:String, alertMessage: String) {
-        let alertController = UIAlertController(title: alertTitle , message: alertMessage, preferredStyle: .alert)
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        alertController.addAction(cancelAction)
-        let openAction = UIAlertAction(title: "Open Setting", style: .default) { (action) in
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(url, options: [:], completionHandler: nil)
-            }
-        }
-        alertController.addAction(openAction)
-        self.present(alertController, animated: true, completion: nil)
     }
 }
