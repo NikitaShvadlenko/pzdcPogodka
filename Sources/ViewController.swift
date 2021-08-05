@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreLocation
+
 class ViewController: UIViewController {
 
     private lazy var refreshControl: UIRefreshControl = {
@@ -15,6 +16,8 @@ class ViewController: UIViewController {
         refreshControl.addTarget(self, action: #selector(self.refresh(_:)), for: .valueChanged)
         return refreshControl
     }()
+
+    private weak var headerView: WeatherHeaderView?
 
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -33,13 +36,14 @@ class ViewController: UIViewController {
         return tableView
     }()
 
-    private let locationManager = CLLocationManager()
+    private lazy var locationManager = CLLocationManager()
 
     private lazy var weather = generateRandomWeather()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
+        locationManager.delegate = self
     }
 }
 
@@ -72,6 +76,7 @@ extension ViewController: UITableViewDelegate {
         switch section {
         case 0:
             let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "\(WeatherHeaderView.self)") as? WeatherHeaderView
+            self.headerView = headerView
             return headerView
 
         default:
@@ -113,6 +118,41 @@ extension ViewController {
                 return Weather(day: date, temperature: randomTemperature)
             }
     }
+
+    private func updateCity(_ city: String) {
+        headerView?.setCity(city)
+    }
+}
+
+// MARL: - CLLocationManagerDelegate
+extension ViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        switch status {
+        case .authorizedWhenInUse, .authorizedAlways:
+            manager.startUpdatingLocation()
+
+        case .denied, .restricted:
+            locationAlert(alertTitle: "Использование геолокации запрещено", alertMessage: "Перейдите в настройки")
+
+        case .notDetermined:
+            manager.requestWhenInUseAuthorization()
+
+        default:
+            break
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.first else { return }
+
+        CLGeocoder().reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            guard let placemark = placemarks?.first,
+                  let city = placemark.locality
+            else { return }
+
+            self?.updateCity(city)
+        }
+    }
 }
 
 //MARK: - Alerts
@@ -122,7 +162,9 @@ extension ViewController{
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         alertController.addAction(cancelAction)
         let openAction = UIAlertAction(title: "Open Setting", style: .default) { (action) in
-            if let url = URL(string: UIApplication.openSettingsURLString){ UIApplication.shared.open(url, options: [:], completionHandler: nil)}
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
         }
         alertController.addAction(openAction)
         self.present(alertController, animated: true, completion: nil)

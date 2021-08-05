@@ -52,6 +52,13 @@ class WeatherHeaderView: UITableViewHeaderFooterView {
     }
 }
 
+// MARK: - Internal methods
+extension WeatherHeaderView {
+    func setCity(_ city: String) {
+        cityLabel.text = city
+    }
+}
+
 // MARK: - Private methods
 extension WeatherHeaderView {
     private func setupViews() {
