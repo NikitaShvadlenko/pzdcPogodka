@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreLocation
+import Moya
 
 class ViewController: UIViewController {
 
@@ -38,7 +39,15 @@ class ViewController: UIViewController {
 
     private lazy var locationManager = CLLocationManager()
 
-    private lazy var weather = generateRandomWeather()
+    private var weather: [Weather] = []
+
+    private let weatherProvider = MoyaProvider<OpenWeatherRoute>()
+
+    private var location: (latitude: Double, longitude: Double)? = nil {
+        didSet {
+            fetchWeather()
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -102,21 +111,7 @@ extension ViewController {
     }
 
     @objc private func refresh(_ sender: UIRefreshControl?) {
-        self.weather = generateRandomWeather()
-        tableView.reloadData()
-        sender?.endRefreshing()
-    }
-
-    private func generateRandomWeather() -> [Weather] {
-        return (1...7)
-            .compactMap { (shift: Int) -> Date? in
-                let currentDate = Date()
-                return Calendar.current.date(byAdding: .day, value: shift, to: currentDate)
-            }
-            .map { (date: Date) -> Weather in
-                let randomTemperature = Double.random(in: 0...30)
-                return Weather(day: date, temperature: randomTemperature)
-            }
+        fetchWeather()
     }
 
     private func updateCity(_ city: String) {
@@ -134,6 +129,32 @@ extension ViewController {
         }
         alertController.addAction(openAction)
         self.present(alertController, animated: true, completion: nil)
+    }
+
+    private func fetchWeather() {
+        guard let location = self.location else { return }
+
+        weatherProvider.request(.oneCall(latitude: location.latitude, longitude: location.longitude)) { [weak self] result in
+            switch result {
+            case let .success(response):
+                do {
+                    let jsonDecoder = JSONDecoder()
+                    jsonDecoder.dateDecodingStrategy = .secondsSince1970
+                    let weatherResponse = try response.map(WeatherResponse.self, using: jsonDecoder, failsOnEmptyData: true)
+                    self?.weather = weatherResponse.forecasts.map { dayWeather in
+                        Weather(day: dayWeather.date, temperature: dayWeather.temperature.day)
+                    }
+                    self?.headerView?.setTemperature(weatherResponse.currentWeather.temperature)
+                    self?.tableView.reloadData()
+                    self?.refreshControl.endRefreshing()
+                } catch {
+                    print(error)
+                }
+
+            case let .failure(error):
+                print(error)
+            }
+        }
     }
 }
 
@@ -164,6 +185,7 @@ extension ViewController: CLLocationManagerDelegate {
             else { return }
 
             self?.updateCity(city)
+            self?.location = (location.coordinate.latitude, location.coordinate.longitude)
         }
     }
 }

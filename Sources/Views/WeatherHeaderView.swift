@@ -57,6 +57,10 @@ extension WeatherHeaderView {
     func setCity(_ city: String) {
         cityLabel.text = city
     }
+
+    func setTemperature(_ temperature: Double) {
+        temperatureLabel.text = String(format: "%.1f °C", temperature)
+    }
 }
 
 // MARK: - Private methods

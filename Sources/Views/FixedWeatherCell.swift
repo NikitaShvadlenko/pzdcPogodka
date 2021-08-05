@@ -31,7 +31,7 @@ class FixedWeatherCell: UITableViewCell {
 
     private lazy var dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEEE"
+        dateFormatter.dateFormat = "EEEE, MMM d"
         return dateFormatter
     }()
 
