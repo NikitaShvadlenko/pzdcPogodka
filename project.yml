@@ -1,0 +1,26 @@
+name: "pzdcPogodka"
+
+settings:
+  base:
+    DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+    ENABLE_BITCODE: NO
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+    CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT: YES
+    CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER: YES
+
+options:
+  deploymentTarget:
+    iOS: 13.0
+
+targets:
+  pzdcPogodka:
+    platform: iOS
+    type: application
+    sources:
+      - path: "Sources"
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: 1
+        DISPLAY_NAME: "pzdcPogodka"
+        PRODUCT_BUNDLE_IDENTIFIER: shvad.pzdcPogodka
+        CODE_SIGN_STYLE: Automatic
