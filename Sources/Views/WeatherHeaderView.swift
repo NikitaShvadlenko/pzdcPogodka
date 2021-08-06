@@ -11,7 +11,7 @@ class WeatherHeaderView: UITableViewHeaderFooterView {
 
     private lazy var cityLabel: UILabel = {
         let label = UILabel()
-        label.text = "New Plymouth"
+        label.text = "—"
         label.textAlignment = .center
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.numberOfLines = 1
@@ -22,7 +22,7 @@ class WeatherHeaderView: UITableViewHeaderFooterView {
 
     private lazy var weatherLabel: UILabel = {
         let label = UILabel()
-        label.text = "На улице рейн"
+        label.text = "Здесь могла быть ваша реклама"
         label.font = UIFont.boldSystemFont(ofSize: 15)
         label.numberOfLines = 1
         label.minimumScaleFactor = 0.1
@@ -33,7 +33,7 @@ class WeatherHeaderView: UITableViewHeaderFooterView {
 
     private lazy var temperatureLabel: UILabel = {
         let label = UILabel()
-        label.text = "13.00"
+        label.text = "— °C"
         label.textAlignment = .center
         label.font = UIFont.boldSystemFont(ofSize: 30)
         label.numberOfLines = 1
@@ -56,6 +56,10 @@ class WeatherHeaderView: UITableViewHeaderFooterView {
 extension WeatherHeaderView {
     func setCity(_ city: String) {
         cityLabel.text = city
+    }
+
+    func setTemperature(_ temperature: Double) {
+        temperatureLabel.text = String(format: "%.1f °C", temperature)
     }
 }
 

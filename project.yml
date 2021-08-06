@@ -12,6 +12,11 @@ options:
   deploymentTarget:
     iOS: 13.0
 
+packages:
+  Moya:
+    url: https://github.com/Moya/Moya
+    from: 14.0.0
+
 targets:
   pzdcPogodka:
     platform: iOS
@@ -24,3 +29,5 @@ targets:
         DISPLAY_NAME: "pzdcPogodka"
         PRODUCT_BUNDLE_IDENTIFIER: shvad.pzdcPogodka
         CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - package: Moya
