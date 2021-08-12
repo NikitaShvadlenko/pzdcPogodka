@@ -8,6 +8,7 @@
 import Foundation
 import Moya
 
+//Это как раз функции "Высокого порядка???" - enum - прочитать, статья есть.
 enum OpenWeatherRoute {
     case oneCall(latitude: Double, longitude: Double)
 }
@@ -41,14 +42,14 @@ extension OpenWeatherRoute: TargetType {
                 "lat": latitude,
                 "lon": longitude,
                 "exclude": "minutely,hourly,alerts",
-                "appid": "abc", // this value is private. Will be removed in commit. You should set your own API key.
+                "appid": "", // this value is private. Will be removed in commit. You should set your own API key.
                 // Register on https://openweathermap.org and generate key
                 "units": "metric"
             ]
             return .requestParameters(parameters: parameters, encoding: URLEncoding.queryString)
         }
     }
-
+// Почему это тут есть? Зачем return nil?
     var headers: [String : String]? {
         return nil
     }

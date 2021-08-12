@@ -45,7 +45,7 @@ class FixedWeatherCell: UITableViewCell {
     }
 
 }
-
+// Почему Internal Method а не public? 
 // MARK: - Internal methods
 extension FixedWeatherCell {
     func configure(weather: Weather) {
@@ -57,7 +57,7 @@ extension FixedWeatherCell {
 
         let attachment = NSTextAttachment()
         attachment.image = UIImage(systemName: imageName)
-
+//Как работают strings with attachments?
         let temperatureAttributedString = NSMutableAttributedString(attachment: attachment)
         let textString = NSAttributedString(string: temperatureString)
         temperatureAttributedString.append(textString)
