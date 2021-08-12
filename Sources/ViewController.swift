@@ -11,23 +11,17 @@ import Moya
 
 class ViewController: UIViewController {
     private lazy var refreshControl: UIRefreshControl = {
-        // Создаешь refreshControl is класса UIRefreshControl
         let refreshControl = UIRefreshControl()
         refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
-        //addTarget работает как с кнопкой. Таргет - функция
         refreshControl.addTarget(self, action: #selector(self.refresh(_:)), for: .valueChanged)
         return refreshControl
     }()
-    //HeaderView - надо посмотреть этот класс
     private weak var headerView: WeatherHeaderView?
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
-        //RefreshControl должен быть у tableView, а не где-то еще
         tableView.refreshControl = refreshControl
-        //Откуда берется инфа для наполнения таблицы
         tableView.dataSource = self
-        //ViewDidLoad скажет TableView, когда нужно наполнить TableView, must conform to protocol
         tableView.delegate = self
         tableView.backgroundColor = .clear
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -38,19 +32,16 @@ class ViewController: UIViewController {
         tableView.estimatedSectionHeaderHeight = 102
         // При заданной высоте сам создаст нужную длинну
         tableView.sectionHeaderHeight = UITableView.automaticDimension
-        //tableView.register(WeatherCell.self, forCellReuseIdentifier: "WeatherCell")
-        //Регистрирую две части таблицы - Одна из них обыкновенная клетка, Другая HeaderFooter. Если мне понадобится между Header и Cell colleсtionView, то можно ли это тоже сюда закинуть?
         tableView.register(FixedWeatherCell.self, forCellReuseIdentifier: "\(FixedWeatherCell.self)")
         tableView.register(WeatherHeaderView.self, forHeaderFooterViewReuseIdentifier: "\(WeatherHeaderView.self)")
         return tableView
     }()
 
-    //Сначала засетапил tableView, теперь пишешь всё что касается локации
     private lazy var locationManager = CLLocationManager()
     //Эта var уже не lazy. Почему?
     private var weather: [Weather] = []
     private let weatherProvider = MoyaProvider<OpenWeatherRoute>()
-    // didSet - Property Observer. Как только ты set значение этой var, начнется функция fetchWeather?
+    // didSet - Property Observer. Как только ты set значение этой var, начнется функция fetchWeather? Кайф.
     private var location: (latitude: Double, longitude: Double)? = nil {
         didSet {
             fetchWeather()
@@ -67,19 +58,14 @@ class ViewController: UIViewController {
 //MARK: - UITableViewDataSource
 extension ViewController: UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        //В самом начале в array элементов нет, поэтому будет 0 rows, потом при fetchWeather array наполнится, появятся и rows для этой инфы.
         return weather.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell: UITableViewCell?
-        //создаешь клетку из класса, до этого зарегестрировал
         let weatherCell = tableView.dequeueReusableCell(withIdentifier: "\(FixedWeatherCell.self)", for: indexPath) as? FixedWeatherCell
-        //То же что и в putinSquads, информация из array должна соответствовать номеру клетки
         let weather = self.weather[indexPath.row]
-        //Вызываешь публичный метод FixedWeatherCell
         weatherCell?.configure(weather: weather)
-        //Assign значения configured клетки в клетку tableview
         cell = weatherCell
         //Проверяешь, чтобы оно было не nil
         guard let cell = cell else {
@@ -122,7 +108,6 @@ extension ViewController {
 
         NSLayoutConstraint.activate(tableViewContraints)
     }
-    //Метод refreshControl
     @objc private func refresh(_ sender: UIRefreshControl?) {
         fetchWeather()
     }
@@ -130,8 +115,7 @@ extension ViewController {
     private func updateCity(_ city: String) {
         headerView?.setCity(city)
     }
-    
-    //Alert точно тот же, что и раньше
+
     private func locationAlert(alertTitle:String, alertMessage: String) {
         let alertController = UIAlertController(title: alertTitle , message: alertMessage, preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
@@ -146,9 +130,7 @@ extension ViewController {
     }
 
     private func fetchWeather() {
-        //что означает Self в этом случае?
         guard let location = self.location else { return }
-        // Чтобы полностью понять это, нужна документация - особенно weak self часть
         weatherProvider.request(.oneCall(latitude: location.latitude, longitude: location.longitude)) { [weak self] result in
             switch result {
             case let .success(response):
@@ -170,7 +152,6 @@ extension ViewController {
                 } catch {
                     print(error)
                 }
-
             case let .failure(error):
                 print(error)
             }
@@ -180,7 +161,6 @@ extension ViewController {
 
 // MARK: - CLLocationManagerDelegate
 extension ViewController: CLLocationManagerDelegate {
-    //Сделал почти то же сто и у меня, но с использованием SWITCH. Чище и понятнее.
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch status {
         case .authorizedWhenInUse, .authorizedAlways:
@@ -188,7 +168,6 @@ extension ViewController: CLLocationManagerDelegate {
 
         case .denied, .restricted:
             locationAlert(alertTitle: "Использование геолокации запрещено", alertMessage: "Перейдите в настройки")
-        //Добавил notDetermined
         case .notDetermined:
             manager.requestWhenInUseAuthorization()
 
@@ -201,7 +180,7 @@ extension ViewController: CLLocationManagerDelegate {
         guard let location = locations.first else { return }
         //reverceGeocode location?
         CLGeocoder().reverseGeocodeLocation(location) { [weak self] placemarks, error in
-            //Из первого placemark достает ближайший город. Даже не нужно к API с lat и lon обращаться.
+            //Из первого placemark достает ближайший город. Даже не нужно к API с lat и lon обращаться ради города. 
             guard let placemark = placemarks?.first,
                   let city = placemark.locality
             else { return }
